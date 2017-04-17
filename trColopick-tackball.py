@@ -36,8 +36,8 @@ coordinates = ()
 data = 0
 AmountLeds = 144;
 MaxX = 600;
-MaxY = 450;
-factor = MaxX/AmountLeds;
+MaxY = 478;
+factor = MaxY/AmountLeds;
 
 # camera
 camera = cv2.VideoCapture(0)
@@ -59,13 +59,11 @@ args = vars(ap.parse_args())
 
 pts = deque(maxlen=args["buffer"])
 
-def getValues() :
-    global coordinates
+def getValues(coordinates) :
     charCoordinates = json.dumps(coordinates)
     unicode_str = charCoordinates.encode('ascii')
-    print(ser)
     ser.write(unicode_str)
-
+    print(coordinates)
     # arduinoData = ser.readline().decode("utf-8", "replace")
     # print (arduinoData)
 
@@ -147,8 +145,8 @@ while True:
         pass
     else:
 		# You can set these HSV-min and HSV-max to the range you want to track when the script starts.
-        greenLower = (22,0,234)
-        greenUpper = (62,164,255)
+        greenLower = (16,10,235)
+        greenUpper = (56,255,255)
         h,s,v = greenLower
         hm,sm,vm = greenUpper
         set_trackbar_values(h, s, v ,hm ,sm , vm, 'HSV')
@@ -160,6 +158,7 @@ while True:
     # cv2.imshow('image', image)
 
     # tracker
+    cv2.rectangle(image, (130, 80), (300,410), (0,255,255),2)
     # grab the current frame
     # (grabbed, frame)  = camera.read()
 	# if we are viewing a video and we did not grab a frame,
@@ -198,13 +197,9 @@ while True:
         ((x, y), radius) = cv2.minEnclosingCircle(c)
 
 		# you can use this coordinates to do anything. it is the center of what you want to track F.E. send them to an arduino ;)
-        coordinates = {"x":  round(x/factor) , "y":  round(y)}
-		# print(coordinates)
-        thr = threading.Thread(target=getValues, args=(), kwargs={})
-        thr.start() # will run "foo"
-        thr.is_alive() # will return whether foo is running currently
-        thr.join() # will wait till "foo" is done
-        # getValues(coordinates)
+        coordinates = {"x":  round(x) , "y":  round(y)}
+        # print(coordinates)
+        getValues(coordinates)
 
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
